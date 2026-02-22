@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Browser - Sejarah XI (60 Soal)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .grid-nav button { transition: all 0.2s ease; }
+        .option-card { transition: all 0.2s ease; border-width: 2px; }
+        .option-selected { border-color: #2563eb !important; background-color: #dbeafe !important; }
+        .option-correct { border-color: #10b981 !important; background-color: #d1fae5 !important; }
+        .option-wrong { border-color: #ef4444 !important; background-color: #fee2e2 !important; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <nav class="bg-slate-900 text-white p-4 shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 p-2 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                </div>
+                <h1 class="font-bold text-lg tracking-tight">ASTS SEJARAH XI - JEPANG</h1>
+            </div>
+            <div id="timer" class="font-mono bg-slate-800 px-4 py-1 rounded border border-slate-700 text-yellow-400 font-bold">00:00:00</div>
+        </div>
+    </nav>
+
+    <div id="main-layout" class="container mx-auto p-4 flex flex-col lg:flex-row gap-6">
+        <!-- Area Soal -->
+        <div class="flex-grow">
+            <div id="quiz-screen" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8 min-h-[600px] flex flex-col">
+                <div class="flex justify-between items-center mb-6 pb-4 border-b border-gray-100">
+                    <div>
+                        <span class="text-xs font-bold text-blue-600 uppercase tracking-widest">Lembar Ujian</span>
+                        <h2 id="question-number" class="text-2xl font-black text-slate-800">SOAL NO. 1</h2>
+                    </div>
+                    <div class="text-right">
+                        <p id="progress-text" class="text-sm font-medium text-gray-500">Progress: 0/60</p>
+                        <div class="w-32 h-2 bg-gray-100 rounded-full mt-1 overflow-hidden">
+                            <div id="progress-bar" class="h-full bg-blue-600 transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="question-text" class="text-lg text-slate-700 leading-relaxed mb-8 font-medium">
+                    Memuat data soal...
+                </div>
+
+                <div id="options-list" class="space-y-3 mb-8">
+                    <!-- Tombol Opsi -->
+                </div>
+
+                <!-- Box Pembahasan -->
+                <div id="explanation-box" class="hidden mb-8 p-5 bg-blue-50 border-l-4 border-blue-500 rounded-r-xl">
+                    <h4 class="font-bold text-blue-800 mb-2 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                        </svg>
+                        Pembahasan:
+                    </h4>
+                    <p id="explanation-text" class="text-slate-700 text-sm leading-relaxed italic"></p>
+                </div>
+
+                <div class="mt-auto pt-6 border-t border-gray-100 flex flex-wrap gap-4 justify-between">
+                    <div class="flex gap-2">
+                        <button onclick="changeQuestion(-1)" id="btn-prev" class="px-5 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-xl font-bold hover:bg-gray-50 disabled:opacity-30">Kembali</button>
+                        <button onclick="changeQuestion(1)" id="btn-next" class="px-5 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 disabled:opacity-30">Berikutnya</button>
+                    </div>
+                    <button onclick="finishQuiz()" id="btn-finish" class="hidden px-8 py-2.5 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 shadow-lg shadow-emerald-200">Selesaikan Ujian</button>
+                </div>
+            </div>
+
+            <!-- Layar Hasil -->
+            <div id="result-screen" class="hidden bg-white rounded-2xl shadow-xl p-10 text-center max-w-2xl mx-auto border border-gray-100">
+                <div class="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h2 class="text-3xl font-black text-slate-800 mb-2">Ujian Selesai!</h2>
+                <p class="text-gray-500 mb-8">Hasil analisis performa Anda berdasarkan 60 soal.</p>
+                
+                <div class="grid grid-cols-2 gap-4 mb-10">
+                    <div class="bg-slate-50 p-6 rounded-2xl border border-gray-100">
+                        <p class="text-xs text-gray-400 font-bold uppercase mb-1">Skor Akhir</p>
+                        <p id="result-score" class="text-5xl font-black text-blue-600">0</p>
+                    </div>
+                    <div class="bg-slate-50 p-6 rounded-2xl border border-gray-100">
+                        <p class="text-xs text-gray-400 font-bold uppercase mb-1">Benar</p>
+                        <p id="result-correct" class="text-5xl font-black text-emerald-500">0</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-3">
+                    <button onclick="location.reload()" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition-all">Ulangi Ujian</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Navigasi -->
+        <div id="sidebar" class="w-full lg:w-96">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 sticky top-24">
+                <h3 class="text-sm font-black text-slate-800 mb-4 flex items-center gap-2">
+                    NAVIGASI SOAL
+                    <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[10px]">60 SOAL</span>
+                </h3>
+                <div id="nav-grid" class="grid grid-cols-5 gap-2 overflow-y-auto max-h-[450px] pr-2 scrollbar-thin">
+                    <!-- Grid nomor soal -->
+                </div>
+                
+                <div class="mt-8 pt-6 border-t border-gray-100 space-y-3">
+                    <div class="flex items-center gap-3 text-xs font-bold text-gray-500">
+                        <div class="w-4 h-4 bg-blue-600 rounded"></div> Sedang Dibuka
+                    </div>
+                    <div class="flex items-center gap-3 text-xs font-bold text-gray-500">
+                        <div class="w-4 h-4 bg-emerald-500 rounded"></div> Sudah Dijawab
+                    </div>
+                    <div class="flex items-center gap-3 text-xs font-bold text-gray-500">
+                        <div class="w-4 h-4 bg-gray-200 rounded"></div> Belum Dijawab
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data 60 Soal Berdasarkan PDF
+        const quizData = [
+            { q: "Sebelum era modern, Jepang merupakan negara yang feodalis... Kebijakan tertutup ini disebut Sakoku. Berdasarkan informasi tersebut, dapat disimpulkan bahwa Jepang berusaha melindungi negaranya dari...", o: ["Perebutan kekuasaan di kalangan penguasa Jepang", "Ancaman pemberontakan-pemberontakan dalam negeri", "Pengaruh-pengaruh yang merusak nilai kehidupan Jepang", "Penguasaan Korea terhadap wilayah-wilayah Jepang yang berpotensi", "Melindungi bahan mentah oleh pihak luar"], a: 2, p: "Kebijakan Sakoku bertujuan melindungi Jepang dari pengaruh asing, khususnya Barat (seperti agama Kristen), yang dianggap merusak nilai-nilai tradisional dan stabilitas politik." },
+            { q: "Salah satu faktor yang melatarbelakangi kebijakan Sakoku di Jepang sejak tahun 1639 adalah...", o: ["Kedatangan bangsa Barat dianggap mengancam stabilitas negara Jepang", "Dependensi Barat terhadap perdagangan dengan bangsa Jepang", "Barat menerapkan monopoli perdagangan di Jepang", "Barat berniat menduduki dan menguasai Jepang", "Adanya perbedaan ras dan adat-istiadat"], a: 0, p: "Kedatangan bangsa Barat dengan misi penyebaran agama (Kristen) dan monopoli dagang dianggap mengancam kedaulatan keshogunan." },
+            { q: "Pada masa pemerintahan Kaisar Matsuhito (1868-1912) Jepang berkembang menjadi negara kuat... Hal tersebut dilandasi oleh prinsip...", o: ["Kebijakan Sakoku", "Restorasi Meiji", "Doktrin Hakko Ichiu", "Politik dumping", "Pax Neerlandica"], a: 2, p: "Hakko Ichiu adalah semboyan Jepang yang berarti 'Delapan Penjuru Dunia Di Bawah Satu Atap' (di bawah kekaisaran Jepang)." },
+            { q: "Sebab khusus terjadinya Perang Dunia II di Asia Pasifik antara Amerika dan Jepang dilatarbelakangi oleh...", o: ["Penyerangan Jepang terhadap pangkalan Pearl Harbour, Hawaii 1941", "Invasi Jepang atas jajahan Belanda Hindia Belanda", "Invasi Jepang atas Indocina", "Kekalahan Prancis terhadap Nazi Jerman", "Persaingan ideologi"], a: 0, p: "Serangan mendadak ke Pearl Harbour pada 7 Desember 1941 memicu AS masuk ke perang dunia melawan Jepang." },
+            { q: "Tujuan dibentuknya persekutuan ABDACOM tahun 1941 adalah...", o: ["Melawan kekuatan Jepang dalam Perang Pasifik", "Melawan Belanda yang menguasai Asia Tenggara", "Melindungi Hindia Belanda dari ancaman invasi Jepang", "Membebaskan Prancis dari Nazi", "Membantu Jepang menguasai Asia"], a: 0, p: "ABDACOM (American-British-Dutch-Australian Command) adalah aliansi sekutu untuk menahan gerak maju militer Jepang." },
+            { q: "Organisasi bentukan Jepang yang bertugas mengajukan usul dan menjawab masalah politik dipimpin Ir. Soekarno adalah...", o: ["Gerakan 3A", "Jawa Hokokai", "Barisan Pemuda", "Chuo Sangi In", "Putera"], a: 3, p: "Chuo Sangi In adalah dewan pertimbangan pusat bentukan Jepang yang melibatkan tokoh Indonesia sebagai penasihat." },
+            { q: "Tujuan Soekarno-Hatta menemui Nishimura sebelum merumuskan teks proklamasi adalah...", o: ["Mengundang rapat PPKI", "Meminta izin proklamasi", "Menjajaki sikap Nishimura mengenai rencana Proklamasi", "Meminta hadir dalam pembacaan teks", "Menyerahkan diri"], a: 2, p: "Pertemuan ini untuk memastikan posisi Jepang yang harus menjaga 'status quo' setelah menyerah pada sekutu." },
+            { q: "Penyerahan kekuasaan tanpa syarat Belanda kepada Jepang berlangsung di...", o: ["Kotabaru, Jambi", "Pidie, Aceh", "Kotagede, Yogyakarta", "Kalijati, Subang", "Linggarjati"], a: 3, p: "Perjanjian Kalijati (8 Maret 1942) menandai dimulainya pendudukan Jepang dan berakhirnya penjajahan Belanda." },
+            { q: "Tujuan Jepang membentuk Jawa Hokokai adalah...", o: ["Agar rakyat Jawa bersatu", "Membuktikan niat baik Jepang", "Memperoleh tenaga prajurit", "Agar rakyat Jawa mendarmabaktikan tenaga kepada Jepang", "Mensejahterakan rakyat"], a: 3, p: "Jawa Hokokai (Himpunan Kebaktian Jawa) bertujuan memobilisasi dana dan tenaga rakyat untuk kepentingan perang." },
+            { q: "Rakyat dibebani menanam pohon jarak yang digunakan sebagai...", o: ["Bahan gula", "Bahan senjata", "Bahan obat", "Pelumas pesawat dan senjata", "Bahan makanan cadangan"], a: 3, p: "Minyak jarak digunakan sebagai pelumas (lubricant) untuk mesin-mesin perang karena kelangkaan bahan bakar mineral." },
+            { q: "Tindakan pemuda di Jakarta setelah mendengar kekalahan Jepang adalah...", o: ["Membunuh orang Jepang", "Mengibarkan bendera", "Mendesak Soekarno-Hatta segera proklamasi", "Merampas senjata", "Melarikan diri ke hutan"], a: 2, p: "Golongan muda menginginkan kemerdekaan segera tanpa menunggu pemberian Jepang agar tidak dicap sebagai hadiah." },
+            { q: "Persiapan kemerdekaan melalui lembaga resmi dilakukan dengan...", o: ["Persiapan menyambut merdeka", "Meminta bantuan Jepang", "Sidang PPKI susun dasar negara", "Memanfaatkan sarana yang diberikan oleh Jepang", "Melakukan sabotase"], a: 3, p: "Tokoh-tokoh kooperatif menggunakan badan seperti BPUPKI dan PPKI sebagai jembatan menuju kemerdekaan." },
+            { q: "Penduduk dipaksa melakukan Seikerei, yang memicu perlawanan karena...", o: ["Menyerahkan hasil panen", "Budak nafsu", "Tenaga paksa", "Menghormati Kaisar dengan membungkuk ke arah matahari", "Pajak tinggi"], a: 3, p: "Seikerei dianggap menyalahi aqidah Islam karena membungkuk kepada manusia (Tenno Heika) menyerupai ibadah." },
+            { q: "Yang tidak termasuk ciri perjuangan bawah tanah masa Jepang adalah...", o: ["Dilakukan rahasia", "Dalam bentuk organisasi", "Sikap seolah bekerja sama", "Diwujudkan dalam bentuk perlawanan bersenjata", "Mencari informasi"], a: 3, p: "Perjuangan bawah tanah fokus pada intelijen dan konsolidasi, bukan konfrontasi fisik/bersenjata secara terbuka." },
+            { q: "Pembubaran MIAI digantikan dengan organisasi...", o: ["Masyumi", "Muhammadiyah", "NU", "Jamiat Kheir", "Persis"], a: 0, p: "Masyumi dibentuk untuk menarik simpati umat Islam dan memudahkan mobilisasi lewat jaringan ulama." },
+            { q: "Sistem Tonarigumi (RT) bertujuan untuk...", o: ["Mempermudah pengaturan penduduk", "Menghitung penduduk", "Mengawasi aktivitas penduduk", "Menciptakan keteraturan", "Meningkatkan kesehatan"], a: 0, p: "Tonarigumi digunakan untuk kontrol sosial yang ketat hingga tingkat keluarga dan mobilisasi gotong royong perang." },
+            { q: "Janji Koiso kemerdekaan kelak kemudian hari dimaksudkan agar...", o: ["Mobilisasi rakyat ke perang", "Mempertahankan pengaruh", "Dianggap pejuang kemerdekaan", "Tetap memperoleh bantuan rakyat memenangi perang", "Menipu sekutu"], a: 3, p: "Diberikan saat posisi Jepang terdesak agar rakyat Indonesia tetap setia dan mendukung militer Jepang." },
+            { q: "Realisasi Janji Koiso berupa BPUPKI mencatat perubahan besar yaitu...", o: ["Jepang beri kemerdekaan", "BPUPKI mewujudkan kemerdekaan Indonesia", "Janji diberikan kelak", "Kebebasan berserikat", "Pembentukan tentara nasional"], a: 1, p: "BPUPKI adalah badan nyata yang mulai menyusun perangkat kenegaraan (Dasar Negara, UUD)." },
+            { q: "Arti penting pidato Kaisar Hirohito 15 Agustus 1945 adalah...", o: ["Menghentikan Perang Asia Timur Raya", "Bangkitnya Jepang", "Perintah menyerah di Indonesia", "Pemberian merdeka", "Penyerangan ke Amerika"], a: 0, p: "Pidato tersebut adalah pernyataan menyerah tanpa syarat Jepang kepada sekutu setelah bom atom di Hiroshima dan Nagasaki." },
+            { q: "Arti penting 'janji' Jepang di akhir pendudukan adalah...", o: ["Semangat anti kolonial", "Mendorong cepat merdeka", "Memicu generasi muda memaksa proklamasi", "Menunda proklamasi", "Meredam amarah rakyat"], a: 2, p: "Ketidakjelasan janji memicu ketidaksabaran golongan muda hingga terjadinya Peristiwa Rengasdengklok." },
+            // ... Soal 21 - 40
+            { q: "Pemimpin Gerakan Tiga A adalah...", o: ["Moh. Hatta", "Mr. Syamsuddin", "Ir. Soekarno", "Ki Hajar Dewantara", "K.H. Mas Mansyur"], a: 1, p: "Gerakan 3A dipimpin oleh Mr. Syamsuddin sebagai upaya propaganda awal Jepang." },
+            { q: "PETA (Pembela Tanah Air) dibentuk pada 3 Oktober 1943 atas usulan...", o: ["Ir. Soekarno", "Gatot Mangkupradja", "Sutan Sjahrir", "K.H. Zainal Mustafa", "Supriyadi"], a: 1, p: "Gatot Mangkupradja mengajukan petisi kepada pemerintah Jepang untuk membentuk tentara pribumi." },
+            { q: "Perlawanan PETA di Blitar pada 14 Februari 1945 dipimpin oleh...", o: ["Sudirman", "Supriyadi", "Slamet Riyadi", "Urip Sumohardjo", "Gatot Subroto"], a: 1, p: "Supriyadi memimpin pemberontakan karena merasa iba melihat penderitaan rakyat akibat Romusha." },
+            { q: "Latar belakang perlawanan rakyat Singaparna Jawa Barat adalah...", o: ["Masalah pajak", "Penolakan terhadap Seikerei", "Perebutan senjata", "Wajib militer", "Larangan berorganisasi"], a: 1, p: "K.H. Zainal Mustafa menentang Seikerei karena dianggap menyembah matahari dan bertentangan dengan Islam." },
+            { q: "Organisasi semi-militer bentukan Jepang untuk pemuda usia 14-22 tahun adalah...", o: ["Heiho", "Keibodan", "Seinedan", "Fujinkai", "Jawa Hokokai"], a: 2, p: "Seinedan (Barisan Pemuda) bertujuan melatih pemuda untuk mempertahankan tanah airnya (bagi kepentingan Jepang)." },
+            { q: "Istilah untuk pembantu prajurit Jepang yang langsung diterjunkan ke medan perang adalah...", o: ["Seinedan", "Keibodan", "Heiho", "PETA", "Kempetai"], a: 2, p: "Heiho adalah organisasi militer yang prajuritnya menjadi bagian integral dari angkatan perang Jepang." },
+            { q: "Organisasi wanita pada masa Jepang yang bertugas di garis belakang adalah...", o: ["Gerewani", "Kowani", "Fujinkai", "Wanita Indonesia", "Aisyiyah"], a: 2, p: "Fujinkai bertugas dalam kegiatan sosial, pengumpulan dana, dan bantuan medis darurat." },
+            { q: "Keibodan memiliki tugas utama sebagai...", o: ["Prajurit inti", "Polisi pembantu (lalu lintas, pemadam kebakaran)", "Mata-mata militer", "Tenaga pengajar", "Pengelola gudang logistik"], a: 1, p: "Keibodan bertugas membantu tugas kepolisian di desa-desa dan kota." },
+            { q: "Empat Serangkai adalah pemimpin organisasi...", o: ["Gerakan 3A", "Putera", "Jawa Hokokai", "Masyumi", "PETA"], a: 1, p: "Putera (Pusat Tenaga Rakyat) dipimpin oleh Soekarno, Hatta, Ki Hajar Dewantara, dan K.H. Mas Mansyur." },
+            { q: "Tujuan Jepang membubarkan Putera karena...", o: ["Terlalu banyak dana", "Para pemimpinnya sakit", "Lebih menguntungkan pergerakan nasional Indonesia", "Diboikot rakyat", "Dikuasai oleh komunis"], a: 2, p: "Jepang sadar Putera dimanfaatkan tokoh nasional untuk menyebarkan semangat nasionalisme." },
+            { q: "Istilah Romusha mengacu pada...", o: ["Prajurit perang", "Buruh paksa", "Petani teladan", "Guru bahasa", "Mata-mata"], a: 1, p: "Romusha adalah sistem kerja paksa untuk membangun pertahanan dan sarana militer Jepang." },
+            { q: "Eksploitasi wanita Indonesia untuk dijadikan penghibur tentara Jepang disebut...", o: ["Geisha", "Jugun Ianfu", "Kunoichi", "Fujinkai", "Romukyo"], a: 1, p: "Jugun Ianfu adalah praktik perbudakan seksual yang dilakukan militer Jepang selama perang." },
+            { q: "BPUPKI dibentuk pada tanggal...", o: ["1 Maret 1945", "1 Juni 1945", "17 Agustus 1945", "7 September 1944", "29 April 1945"], a: 4, p: "Pembentukan diumumkan pada 1 Maret, namun diresmikan pada 29 April 1945 (ulang tahun Kaisar Hirohito)." },
+            { q: "Ketua BPUPKI yang ditunjuk Jepang adalah...", o: ["Ir. Soekarno", "Dr. Radjiman Wedyodiningrat", "Moh. Hatta", "Mr. Muhammad Yamin", "R.P. Suroso"], a: 1, p: "Dr. Radjiman memimpin jalannya sidang untuk merumuskan dasar negara." },
+            { q: "Sidang pertama BPUPKI (29 Mei - 1 Juni 1945) membahas...", o: ["Bentuk Negara", "Dasar Negara", "Batasan Wilayah", "Rancangan UUD", "Teks Proklamasi"], a: 1, p: "Fokus utama adalah mencari landasan filosofis bagi Indonesia merdeka (Pancasila)." },
+            { q: "Piagam Jakarta (Jakarta Charter) dirumuskan oleh...", o: ["BPUPKI", "PPKI", "Panitia Sembilan", "Panitia Kecil", "Kempetai"], a: 2, p: "Panitia Sembilan menyatukan pandangan golongan Islam dan Nasionalis dalam Piagam Jakarta." },
+            { q: "Setelah BPUPKI bubar, dibentuk PPKI pada tanggal...", o: ["17 Agustus 1945", "7 Agustus 1945", "1 Juni 1945", "10 Agustus 1945", "15 Agustus 1945"], a: 1, p: "PPKI (Dokuritsu Zunbi Inkai) bertugas melanjutkan persiapan teknis kemerdekaan." },
+            { q: "Jumlah anggota PPKI yang awalnya 21 orang ditambah 6 orang tanpa sepengetahuan Jepang untuk...", o: ["Melawan Jepang", "Menghindari campur tangan Jepang", "Mensejahterakan rakyat", "Menipu sekutu", "Memperbanyak anggota"], a: 1, p: "Penambahan ini untuk membuktikan bahwa kemerdekaan Indonesia adalah murni usaha rakyat sendiri." },
+            { q: "Kota di Jepang yang dijatuhi bom atom oleh Sekutu adalah Hiroshima dan...", o: ["Tokyo", "Osaka", "Nagasaki", "Kyoto", "Yokohama"], a: 2, p: "Pengeboman Hiroshima (6 Agt) dan Nagasaki (9 Agt) memaksa Jepang menyerah." },
+            { q: "Berita kekalahan Jepang pertama kali didengar oleh Sutan Sjahrir melalui...", o: ["Koran", "Surat kabar", "Siaran radio luar negeri (BBC/Voice of America)", "Informasi intelijen", "Utusan Jepang"], a: 2, p: "Sjahrir mendengar berita penyerahan Jepang melalui radio yang disembunyikan dari pengawasan Jepang." },
+            // ... Soal 41 - 60
+            { q: "Tujuan penculikan Soekarno-Hatta ke Rengasdengklok adalah...", o: ["Menghindari ancaman Jepang", "Mendesak segera proklamasi dan menjauhkan dari pengaruh Jepang", "Meminta izin militer", "Menyiapkan tentara", "Menemui sekutu"], a: 1, p: "Pemuda ingin menjamin Soekarno-Hatta tidak terpengaruh janji-janji kosong Jepang." },
+            { q: "Tokoh yang menjamin bahwa Proklamasi akan dilaksanakan paling lambat 17 Agustus adalah...", o: ["Sukarni", "Wikana", "Achmad Soebardjo", "Sayuti Melik", "Laksamana Maeda"], a: 2, p: "Achmad Soebardjo menjadi penjamin nyawa Soekarno-Hatta agar dibawa kembali ke Jakarta." },
+            { q: "Rumah Laksamana Maeda dipilih sebagai tempat perumusan teks proklamasi karena...", o: ["Besar dan megah", "Maeda mendukung kemerdekaan dan memiliki hak imunitas (aman dari Kempetai)", "Dekat dengan lapangan Ikada", "Tempat tinggal Soekarno", "Mudah dijaga pemuda"], a: 1, p: "Kediaman Maeda dianggap zona aman karena otoritas angkatan laut (Kaigun) sering berselisih dengan angkatan darat (Rikugun)." },
+            { q: "Teks Proklamasi ditulis tangan oleh Soekarno dan diketik oleh...", o: ["Moh. Hatta", "Sayuti Melik", "B.M. Diah", "Sudiro", "Wikana"], a: 1, p: "Sayuti Melik melakukan beberapa perubahan kecil saat mengetik naskah asli tulisan tangan." },
+            { q: "Upacara Proklamasi 17 Agustus 1945 dilakukan di...", o: ["Lapangan Ikada", "Istana Merdeka", "Jl. Pegangsaan Timur No. 56", "Hotel Yamato", "Gedung Chuo Sangi In"], a: 2, p: "Dipilih rumah Soekarno demi alasan keamanan karena Lapangan Ikada sudah dijaga ketat tentara Jepang." },
+            { q: "Bendera Pusaka dijahit oleh...", o: ["Fatmawati", "Kusumawardhani", "Kartini", "Dewi Sartika", "Megawati"], a: 0, p: "Ibu Fatmawati menjahit bendera Merah Putih dalam suasana yang sangat sederhana." },
+            { q: "Pengibar bendera Merah Putih pertama kali adalah Latief Hendraningrat, S. Suhud, dan...", o: ["S.K. Trimurti", "Sudirman", "Supriyadi", "B.M. Diah", "Chaeryl Saleh"], a: 0, p: "S.K. Trimurti menolak menjadi pengibar dan lebih memilih mendampingi pembawa bendera." },
+            { q: "Hasil sidang PPKI tanggal 18 Agustus 1945 menetapkan...", o: ["Dasar Negara Pancasila", "Presiden dan Wakil Presiden RI pertama", "Pembagian 8 Provinsi", "Pembentukan BKR", "Sistem Partai Tunggal"], a: 1, p: "Soekarno dan Hatta terpilih secara aklamasi sebagai Presiden dan Wapres pertama RI." },
+            { q: "Sistem pemerintahan awal yang disepakati adalah...", o: ["Monarki", "Republik", "Serikat", "Parlementer", "Komunis"], a: 1, p: "Indonesia disepakati berbentuk Republik dengan kedaulatan di tangan rakyat." },
+            { q: "Tujuan dibentuknya Komite Nasional Indonesia (KNI) pada awal merdeka adalah...", o: ["Menyiapkan perang", "Membantu tugas Presiden sebelum DPR/MPR terbentuk", "Membentuk kabinet", "Menagih hutang", "Menyusun strategi diplomasi"], a: 1, p: "KNIP berfungsi sebagai badan legislatif sementara sebelum pemilihan umum dilaksanakan." },
+            { q: "Sistem ekonomi yang diterapkan Jepang dengan mewajibkan daerah memenuhi kebutuhannya sendiri disebut...", o: ["Merkantilisme", "Liberalisme", "Autarki", "Komunisme", "Sosialisme"], a: 2, p: "Autarki bertujuan agar beban logistik tentara tidak terpusat, namun justru menyengsarakan daerah yang miskin sumber daya." },
+            { q: "Tanaman yang wajib ditanam rakyat untuk bahan kain pakaian adalah...", o: ["Jarak", "Kapas", "Rosella", "Padi", "Tebu"], a: 2, p: "Serat rosella digunakan untuk membuat karung goni dan bahan pakaian darurat karena tekstil impor terputus." },
+            { q: "Kebijakan Jepang mewajibkan rakyat menyerahkan hasil padi sebesar...", o: ["10%", "30%", "60%", "80%", "100%"], a: 2, p: "Rakyat hanya boleh menyimpan 40% hasil panen, sisanya disetor untuk pemerintah militer dan lumbung desa." },
+            { q: "Dampak positif pendudukan Jepang dalam bidang pendidikan adalah...", o: ["Beasiswa ke Belanda", "Penggunaan Bahasa Indonesia sebagai bahasa pengantar", "Pembangunan sekolah mewah", "Kurikulum bebas agama", "Hilangnya sistem kelas"], a: 1, p: "Pelarangan Bahasa Belanda justru memberi ruang bagi Bahasa Indonesia untuk berkembang sebagai bahasa nasional." },
+            { q: "Alasan Jepang melarang penggunaan Bahasa Belanda adalah...", o: ["Susah dipelajari", "Menghapus pengaruh Barat di Indonesia", "Jepang tidak bisa bahasa Belanda", "Bahasa Belanda tidak baku", "Ingin mempopulerkan bahasa Jawa"], a: 1, p: "Ini bagian dari gerakan de-Westernisasi untuk menanamkan pengaruh 'Asia untuk Asia'." },
+            { q: "Lagu Kimigayo adalah...", o: ["Lagu rakyat Indonesia", "Lagu perjuangan", "Lagu kebangsaan Jepang", "Lagu daerah Jawa", "Lagu perpisahan"], a: 2, p: "Siswa sekolah pada masa Jepang wajib menyanyikan Kimigayo dan menghormat ke arah Tokyo setiap pagi." },
+            { q: "Dampak pendudukan Jepang bagi struktur sosial desa adalah...", o: ["Hilangnya peran Lurah", "Munculnya sistem Tonarigumi (RT/RW)", "Rakyat menjadi kaya", "Pendidikan merata", "Sistem kasta hilang"], a: 1, p: "Sistem RT (Tonarigumi) adalah warisan Jepang yang masih digunakan di Indonesia hingga kini." },
+            { q: "Fokus ekonomi Jepang di Indonesia adalah untuk...", o: ["Kesejahteraan rakyat", "Pembangunan industri", "Membiayai mesin perang", "Membayar hutang", "Ekspor ke Eropa"], a: 2, p: "Seluruh sumber daya Indonesia dikuras habis (eksploitatif) demi kemenangan Perang Pasifik." },
+            { q: "Faktor utama kemerosotan ekonomi masa Jepang adalah...", o: ["Sistem tidak efektif", "Rakyat malas", "Inflasi global", "Fokus Jepang pada perang", "Eksploitasi masif sumber daya alam dan manusia"], a: 4, p: "Pengurasan berlebihan menyebabkan kelaparan, kemiskinan, dan inflasi parah di akhir pendudukan." },
+            { q: "Berikut yang tidak termasuk dampak ekonomi Jepang adalah...", o: ["Sistem ekonomi pro rakyat", "Setor wajib padi", "Kebijakan Autarki", "Pengawasan ketat ekonomi", "Fokus komoditas perang"], a: 0, p: "Ekonomi zaman Jepang sama sekali tidak pro-rakyat, melainkan sangat menyengsarakan dan bersifat memeras." }
+        ];
+
+        let currentIdx = 0;
+        let userAnswers = new Array(quizData.length).fill(null);
+        let time = 0;
+        let timerId;
+
+        function init() {
+            renderNav();
+            updateDisplay();
+            startTimer();
+        }
+
+        function renderNav() {
+            const grid = document.getElementById('nav-grid');
+            grid.innerHTML = '';
+            quizData.forEach((_, i) => {
+                const btn = document.createElement('button');
+                btn.id = `nav-${i}`;
+                btn.innerText = i + 1;
+                btn.className = 'py-3 text-xs font-black rounded-lg transition-all border border-gray-100 bg-gray-100 text-gray-400 hover:bg-gray-200';
+                btn.onclick = () => { currentIdx = i; updateDisplay(); };
+                grid.appendChild(btn);
+            });
+        }
+
+        function updateDisplay() {
+            const q = quizData[currentIdx];
+            document.getElementById('question-number').innerText = `SOAL NO. ${currentIdx + 1}`;
+            document.getElementById('question-text').innerText = q.q;
+            
+            const list = document.getElementById('options-list');
+            list.innerHTML = '';
+            
+            const letters = ['A', 'B', 'C', 'D', 'E'];
+            q.o.forEach((opt, i) => {
+                const isSelected = userAnswers[currentIdx] === i;
+                const btn = document.createElement('button');
+                btn.className = `option-card w-full text-left p-4 rounded-xl flex items-center gap-4 border-gray-200 hover:bg-slate-50 ${isSelected ? 'option-selected' : 'bg-white'}`;
+                btn.onclick = () => selectOption(i);
+                btn.innerHTML = `
+                    <div class="w-8 h-8 rounded-lg ${isSelected ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500'} flex items-center justify-center font-black shrink-0">
+                        ${letters[i]}
+                    </div>
+                    <span class="font-medium text-slate-700">${opt}</span>
+                `;
+                list.appendChild(btn);
+            });
+
+            // Update Nav Styles
+            quizData.forEach((_, i) => {
+                const btn = document.getElementById(`nav-${i}`);
+                if (i === currentIdx) {
+                    btn.className = 'py-3 text-xs font-black rounded-lg bg-blue-600 text-white shadow-md ring-2 ring-blue-100';
+                } else if (userAnswers[i] !== null) {
+                    btn.className = 'py-3 text-xs font-black rounded-lg bg-emerald-500 text-white shadow-sm';
+                } else {
+                    btn.className = 'py-3 text-xs font-black rounded-lg bg-gray-100 text-gray-400 border border-gray-200';
+                }
+            });
+
+            // Pembahasan
+            const expBox = document.getElementById('explanation-box');
+            if (userAnswers[currentIdx] !== null) {
+                expBox.classList.remove('hidden');
+                document.getElementById('explanation-text').innerText = q.p;
+            } else {
+                expBox.classList.add('hidden');
+            }
+
+            // Buttons
+            document.getElementById('btn-prev').disabled = currentIdx === 0;
+            const isLast = currentIdx === quizData.length - 1;
+            document.getElementById('btn-next').classList.toggle('hidden', isLast);
+            document.getElementById('btn-finish').classList.toggle('hidden', !isLast);
+
+            // Progress
+            const answered = userAnswers.filter(a => a !== null).length;
+            const percent = (answered / quizData.length) * 100;
+            document.getElementById('progress-text').innerText = `Progress: ${answered}/${quizData.length}`;
+            document.getElementById('progress-bar').style.width = `${percent}%`;
+        }
+
+        function selectOption(idx) {
+            userAnswers[currentIdx] = idx;
+            updateDisplay();
+        }
+
+        function changeQuestion(dir) {
+            currentIdx += dir;
+            updateDisplay();
+        }
+
+        function startTimer() {
+            timerId = setInterval(() => {
+                time++;
+                const h = Math.floor(time / 3600).toString().padStart(2, '0');
+                const m = Math.floor((time % 3600) / 60).toString().padStart(2, '0');
+                const s = (time % 60).toString().padStart(2, '0');
+                document.getElementById('timer').innerText = `${h}:${m}:${s}`;
+            }, 1000);
+        }
+
+        function finishQuiz() {
+            const answered = userAnswers.filter(a => a !== null).length;
+            if (answered < quizData.length) {
+                if(!confirm(`Anda baru menjawab ${answered} dari 60 soal. Yakin ingin mengakhiri?`)) return;
+            }
+
+            clearInterval(timerId);
+            let correct = 0;
+            userAnswers.forEach((ans, i) => {
+                if(ans === quizData[i].a) correct++;
+            });
+
+            const score = Math.round((correct / quizData.length) * 100);
+            
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('sidebar').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            
+            document.getElementById('result-score').innerText = score;
+            document.getElementById('result-correct').innerText = correct;
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
+
